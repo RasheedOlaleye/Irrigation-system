@@ -253,6 +253,22 @@ export async function getIrrigationLogs(
   return snapshot.val() as Record<string, IrrigationLog>;
 }
 
+export function subscribeToIrrigationLogs(
+  deviceId: string,
+  callback: (logs: Record<string, IrrigationLog>) => void
+): () => void {
+  const logsRef = ref(database, `logs/${deviceId}/irrigation`);
+
+  const unsubscribe = onValue(logsRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback({});
+      return;
+    }
+
+    callback(snapshot.val() as Record<string, IrrigationLog>);
+  });
+
+  return unsubscribe;
 
 // ============================================================
 // SENSOR LOGS
