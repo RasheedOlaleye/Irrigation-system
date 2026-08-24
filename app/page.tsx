@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';  // Add this import
 
 // --- Types ---
 interface Network {
@@ -39,6 +40,8 @@ const SignalBars = ({ rssi }: { rssi: number }) => {
 };
 
 export default function ESP32SetupPage() {
+  const router = useRouter();  // Add this hook
+  
   const [status, setStatus] = useState<SetupState>('scanning');
   const [networks, setNetworks] = useState<Network[]>([]);
   const [selectedSsid, setSelectedSsid] = useState<string>('');
@@ -113,6 +116,12 @@ export default function ESP32SetupPage() {
           if (data.status === 'GOT_IP' || data.connected) {
             setAssignedIp(data.ip || '');
             setStatus('success');
+            
+            // Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 2000);
+            
             return;
           } else if (data.status === 'FAILED') {
             setErrorMsg('ESP32 failed to authenticate with the network. Check your password.');
@@ -184,13 +193,13 @@ export default function ESP32SetupPage() {
         {/* Success State */}
         {status === 'success' ? (
           <div className="text-center space-y-4 py-4">
-            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl animate-pulse">
               ✓
             </div>
             <div className="space-y-1">
               <h2 className="font-semibold text-emerald-400">Successfully Connected!</h2>
               <p className="text-sm text-slate-400">
-                Device is now on your network.
+                Device is now on your network. Redirecting to dashboard...
               </p>
               {assignedIp && (
                 <p className="text-xs font-mono text-slate-500 mt-2">
@@ -198,15 +207,9 @@ export default function ESP32SetupPage() {
                 </p>
               )}
             </div>
-            <button
-              onClick={() => {
-                setStatus('scanning');
-                scanNetworks();
-              }}
-              className="mt-2 text-xs text-slate-400 hover:text-white underline transition-colors"
-            >
-              Configure another network
-            </button>
+            <div className="flex justify-center mt-4">
+              <div className="w-8 h-8 border-4 border-slate-700 border-t-emerald-400 rounded-full animate-spin" />
+            </div>
           </div>
         ) : (
           <>
