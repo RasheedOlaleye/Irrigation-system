@@ -269,6 +269,7 @@ export function subscribeToIrrigationLogs(
   });
 
   return unsubscribe;
+}
 
 // ============================================================
 // SENSOR LOGS
@@ -323,3 +324,4 @@ export async function updateDevice(
     data
   );
 }
+
